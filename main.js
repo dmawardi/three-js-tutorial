@@ -1,5 +1,5 @@
 import "./style.css";
-import * as THREE from "tree";
+import * as THREE from "three";
 
 const scene = new THREE.Scene();
 
@@ -13,7 +13,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 // renders image
-const renderer = new THREE.WebGlRenderer({
+const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector("#bg"),
 });
 
@@ -26,6 +26,30 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 camera.position.setZ(30);
 
 // draw using scene and camera
-renderer.render(acene, camera);
+renderer.render(scene, camera);
 
 // Completion of setup of render
+
+// Create a ring geometry object
+const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
+// many materials contained within Three. You can also make custom
+// basic material doesn't require light source
+const material = new THREE.MeshBasicMaterial({
+  color: 0xff6347,
+  // gives wireframe to better see geometry
+  wireframe: true,
+});
+// combine geometry with material to create mesh
+const torus = new THREE.Mesh(geometry, material);
+
+// add to scene (will be seen upon next render)
+scene.add(torus);
+
+animate();
+
+function animate() {
+  // tell browser that this function will be what is used as animation frame
+  requestAnimationFrame(animate);
+  // render
+  renderer.render(scene, camera);
+}
