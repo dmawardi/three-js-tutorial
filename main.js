@@ -36,7 +36,6 @@ renderer.render(scene, camera);
 const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
 // many materials contained within Three. You can also make custom
 // basic material doesn't require light source: MeshBasicMaterial
-// standard material does:
 const material = new THREE.MeshStandardMaterial({
   color: 0xff6347,
   // gives wireframe to better see geometry
@@ -45,6 +44,8 @@ const material = new THREE.MeshStandardMaterial({
 // combine geometry with material to create mesh
 const torus = new THREE.Mesh(geometry, material);
 
+torus.position.x += 10;
+torus.position.z += 10;
 // add to scene (will be seen upon next render)
 scene.add(torus);
 
@@ -60,10 +61,10 @@ scene.add(pointLight, ambientLight);
 
 // Helpers
 // light helper tools are available for all light types
-const lightHelper = new THREE.PointLightHelper(pointLight);
-// draws 2d grid along screen
-const gridHelper = new THREE.GridHelper(200, 50);
-scene.add(lightHelper, gridHelper);
+// const lightHelper = new THREE.PointLightHelper(pointLight);
+// // draws 2d grid along screen
+// const gridHelper = new THREE.GridHelper(200, 50);
+// scene.add(lightHelper, gridHelper);
 
 // takes camera and dom element from render as arg
 // listens to mouse through dom element and affects camera
@@ -72,22 +73,61 @@ const controls = new OrbitControls(camera, renderer.domElement);
 // randomly place stars
 Array(200).fill().forEach(addStar);
 
-// create texture using textureloader and laodinng image
+// Background
 const spaceTexture = new THREE.TextureLoader().load("./assets/space.jpg");
 // apply to scene
 scene.background = spaceTexture;
 
 // Texture mapping: Use 2d image to cover 3d object
+// profile box
 const myTexture = new THREE.TextureLoader().load("./assets/profile.png");
 const profileBox = new THREE.Mesh(
-  new THREE.BoxGeometry(5, 5, 5),
-  // use basic material for texture mapping
+  new THREE.BoxGeometry(3, 3, 3),
+  // map is for texture mapping
   new THREE.MeshBasicMaterial({ map: myTexture })
 );
-
 scene.add(profileBox);
 
+// Moon
+const moonTexture = new THREE.TextureLoader().load("./assets/moon.jpg");
+const normalTexture = new THREE.TextureLoader().load("./assets/normal.jpg");
+const moon = new THREE.Mesh(
+  new THREE.SphereGeometry(3, 32, 32),
+  new THREE.MeshStandardMaterial({ map: moonTexture, normalMap: normalTexture })
+);
+moon.position.z = 30;
+moon.position.setX(-10);
+
+profileBox.position.z = -10;
+profileBox.position.x = 7;
+profileBox.position.y = -2;
+
+scene.add(moon);
+
 animate();
+
+// event handler for when user scrolls
+document.body.onscroll = moveCamera;
+
+function moveCamera() {
+  // getBoundingClient().top will get distance of viewport from top of page
+  const top = document.body.getBoundingClientRect().top;
+
+  // moon rotation
+  moon.rotation.x += 0.05;
+  moon.rotation.y += 0.075;
+  moon.rotation.z += 0.05;
+
+  // profileBox
+  profileBox.rotation.x += 0.01;
+  profileBox.rotation.y += 0.01;
+
+  // camera
+  // top is always positive, so multiply with neg
+  camera.position.x = top * -0.0002;
+  camera.position.y = top * -0.0002;
+  camera.position.z = top * -0.033;
+}
 
 function addStar() {
   const geometry = new THREE.SphereGeometry(0.25, 24, 24);
@@ -110,14 +150,13 @@ function animate() {
   // Torus animation
   torus.rotation.x += 0.01;
   torus.rotation.y += 0.005;
-  torus.rotation.z += 0.01;
+  // torus.rotation.z += 0.01;
 
-  // profileBox.rotation.x += 0.01;
-  // profileBox.rotation.y += 0.005;
-  // profileBox.rotation.z += 0.01;
+  // moon rotation
+  moon.rotation.x += 0.005;
 
   // reflect camera changes from orbit controls with each animation update
-  controls.update();
+  // controls.update();
 
   // render
   renderer.render(scene, camera);
